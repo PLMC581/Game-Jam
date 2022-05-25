@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
@@ -22,24 +21,24 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D _rigidBody;
 
     private bool isGrounded;
+    [SerializeField] private float _direction = 1f;
     private void Awake() => _rigidBody = GetComponent<Rigidbody2D>();
 
     private void Start() => _remainingJumps = _maxJumps;
 
     private void Update()
     {
-        var hit = Physics2D.OverlapCircle(_feet.position, _groundingRadius, _layer); 
-        
-        isGrounded = hit != null;
-        
+        CheckPlayerGrounding();
         HandleJump();
-        if (_holdingSkull)
+        HandleSkullPickup();
+        if (Input.GetKeyDown(KeyCode.A))
         {
-            if (Input.GetKeyDown(KeyCode.F))
-            {
-                GetComponentInChildren<SkullPickup>().DropSkull();
-                _holdingSkull = false;
-            }
+            _direction = -1f;
+        }
+            
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            _direction = 1f;
         }
     }
 
@@ -48,13 +47,34 @@ public class PlayerController : MonoBehaviour
         HandleMovement();
     }
 
+    private void CheckPlayerGrounding()
+    {
+        var hit = Physics2D.OverlapCircle(_feet.position, _groundingRadius, _layer);
+
+        isGrounded = hit != null;
+    }
+
+    private void HandleSkullPickup()
+    {
+        if (_holdingSkull)
+        {
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                GetComponentInChildren<SkullPickup>().ThrowSkull(_direction);
+                _holdingSkull = false;
+            }
+        }
+    }
+
     private void HandleMovement()
     {
+      
         if (isGrounded)
         {
             var horizontal = Input.GetAxis("Horizontal") * _speed;
 
             _rigidBody.velocity = new Vector2(horizontal, _rigidBody.velocity.y);
+            
         }
     }
 

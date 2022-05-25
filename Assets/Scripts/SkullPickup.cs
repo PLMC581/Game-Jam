@@ -1,10 +1,13 @@
-using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class SkullPickup : MonoBehaviour
 {
-    private bool _pickedUp;
+    [FormerlySerializedAs("_throwForce")] [SerializeField] private float _horizontalThrowForce = 10f;
+    [SerializeField] private float _verticalThrowForce = 3f;
     
+    private bool _pickedUp;
+
     private PlayerController _player;
     private Rigidbody2D _rigidBody;
 
@@ -28,12 +31,11 @@ public class SkullPickup : MonoBehaviour
         var player = other.gameObject.GetComponent<PlayerController>();
         if (player)
             _pickedUp = true;
-
-
     }
 
-    public void DropSkull()
+    public void ThrowSkull(float direction)
     {
+        _rigidBody.velocity = new Vector2(_horizontalThrowForce * direction, _verticalThrowForce);
         transform.parent = null;
         _pickedUp = false;
         _rigidBody.isKinematic = false;
