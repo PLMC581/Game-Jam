@@ -68,14 +68,10 @@ public class PlayerController : MonoBehaviour
 
     private void HandleMovement()
     {
-      
-        if (isGrounded)
-        {
-            var horizontal = Input.GetAxis("Horizontal") * _speed;
+        var horizontal = Input.GetAxis("Horizontal") * _speed;
 
-            _rigidBody.velocity = new Vector2(horizontal, _rigidBody.velocity.y);
-            
-        }
+        _rigidBody.velocity = new Vector2(horizontal, _rigidBody.velocity.y);
+        
     }
 
     private void HandleJump()

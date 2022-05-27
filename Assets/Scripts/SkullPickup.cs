@@ -1,12 +1,13 @@
+using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class SkullPickup : MonoBehaviour
 {
-    [FormerlySerializedAs("_throwForce")] [SerializeField] private float _horizontalThrowForce = 10f;
+    [SerializeField] private float _horizontalThrowForce = 10f;
     [SerializeField] private float _verticalThrowForce = 3f;
     
-    private bool _pickedUp;
+    private bool _canPickUp;
+    private bool _canDamage;
 
     private PlayerController _player;
     private Rigidbody2D _rigidBody;
@@ -19,7 +20,7 @@ public class SkullPickup : MonoBehaviour
 
     private void Update()
     {
-        if (_pickedUp)
+        if (_canPickUp)
         {
             if(Input.GetKeyDown(KeyCode.E))
                  _player.PickupSkull(transform);
@@ -30,14 +31,34 @@ public class SkullPickup : MonoBehaviour
     {
         var player = other.gameObject.GetComponent<PlayerController>();
         if (player)
-            _pickedUp = true;
+        {
+            _canPickUp = true;
+            _canDamage = false;
+        }
+
+        if (_canDamage)
+        {
+            var _damageable = other.GetComponent<IDamageable>();
+            if (_damageable != null)
+            {
+                _damageable.Hit();
+            }
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        
+        if (other.collider.CompareTag("Ground"))
+            _rigidBody.velocity = Vector2.zero;
     }
 
     public void ThrowSkull(float direction)
     {
         _rigidBody.velocity = new Vector2(_horizontalThrowForce * direction, _verticalThrowForce);
         transform.parent = null;
-        _pickedUp = false;
+        _canPickUp = false;
         _rigidBody.isKinematic = false;
+        _canDamage = true;
     }
 }
