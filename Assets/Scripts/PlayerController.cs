@@ -14,20 +14,39 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private bool _holdingSkull;
     [SerializeField] private Transform _pickupTransform;
+    [SerializeField] private float _direction = 1f;
+
+    private Vector3 _startingPos;
+    private bool isGrounded;
     private float _fallTimer;
     private float _jumpTimer;
 
     private int _remainingJumps;
+
     private Rigidbody2D _rigidBody;
+    private Animator _animator;
+    private SpriteRenderer _spriteRenderer;
+    private GameManager _gameManager;
 
-    private bool isGrounded;
-    [SerializeField] private float _direction = 1f;
-    private void Awake() => _rigidBody = GetComponent<Rigidbody2D>();
+    private void Awake()
+    {
+        _rigidBody = GetComponent<Rigidbody2D>();
+        _animator = GetComponent<Animator>();
+        _spriteRenderer = GetComponent<SpriteRenderer>();
+        _gameManager = FindObjectOfType<GameManager>();
+    }
 
-    private void Start() => _remainingJumps = _maxJumps;
+    private void Start()
+    {
+        _remainingJumps = _maxJumps;
+        _startingPos = transform.position;
+    }
 
     private void Update()
     {
+        if(_gameManager.GameOver) 
+            gameObject.SetActive(false);
+        
         CheckPlayerGrounding();
         HandleJump();
         HandleSkullPickup();
@@ -39,6 +58,12 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.D))
         {
             _direction = 1f;
+        }
+        if(isGrounded)
+            _animator.SetBool("Jump", false);
+        else
+        {
+            _animator.SetBool("Jump", true);
         }
     }
 
@@ -71,13 +96,17 @@ public class PlayerController : MonoBehaviour
         var horizontal = Input.GetAxis("Horizontal") * _speed;
 
         _rigidBody.velocity = new Vector2(horizontal, _rigidBody.velocity.y);
-        
+        _animator.SetBool("Walk", horizontal != 0);
+        if(horizontal != 0)
+            _spriteRenderer.flipX = horizontal < 0;
+
     }
 
     private void HandleJump()
     {
         if (Input.GetButtonDown("Fire1"))
         {
+           
             if (_remainingJumps > 0)
             {
                 _rigidBody.velocity = new Vector2(_rigidBody.velocity.x, _jumpVelocity);
@@ -113,5 +142,10 @@ public class PlayerController : MonoBehaviour
         skull.parent = transform;
         skull.GetComponent<Rigidbody2D>().isKinematic = true;
         _holdingSkull = true;
+    }
+
+    public void Kill()
+    { 
+        transform.position = _startingPos;
     }
 }

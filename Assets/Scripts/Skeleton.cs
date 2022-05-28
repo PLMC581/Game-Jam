@@ -7,7 +7,7 @@ public class Skeleton : MonoBehaviour, IDamageable
 {
     [SerializeField] private Transform _leftSensor;
     [SerializeField] private Transform _rightSensor;
-    [FormerlySerializedAs("_speed")] [SerializeField] private float _direction = -1f;
+    [SerializeField] private float _direction = -1f;
 
     private Rigidbody2D _rigidbody;
     private SpriteRenderer _spriteRenderer;
